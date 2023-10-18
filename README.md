@@ -1,7 +1,10 @@
-## vertfn — Go linter for Vertical Function Ordering
+## refdir — Go linter that can enforce reference-based ordering of definitions in a file
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/nikolaydubina/vertfn)](https://goreportcard.com/report/github.com/nikolaydubina/vertfn)
-[![go-recipes](https://raw.githubusercontent.com/nikolaydubina/go-recipes/main/badge.svg?raw=true)](https://github.com/nikolaydubina/go-recipes)
+[![Go Report Card](https://goreportcard.com/badge/github.com/devnev/refdir)](https://goreportcard.com/report/github.com/devnev/refdir)
+
+This linter was start as a fork from the [vertfn linter by
+@nikolaydubina](https://github.com/nikolaydubina/vertfn). However it is a
+significant departure in scope from that linter.
 
 > _Disclaimer: false positives; practically this is useful for "exploration" rather than for "enforcement"_
 
@@ -13,87 +16,11 @@
 ![](./doc/code-dep-viz.png)
 
 ```go
-go install github.com/nikolaydubina/vertfn@latest
+go install github.com/devnev/refdir@latest
 ```
 
 ```bash
-verfn --verbose ./...
+refdir --verbose ./...
 ```
 
 ![](./doc/output-color.png)
-
-## False Positives
-
-Improving false positive rate is good, such as for following cases:
-
- * same function names but different classes
- * same function names but from different packages
- * functions passed as arguments
- * functions passed as arguments and argument name matches existing function names 
-
-## Appendix A: Canonical Java Example
-
-Clean Code, Chapter 5, code example `WikiPageResponder.java`
-
-<details>
-<summary>
-code
-</summary>
-
-```java
-public class WikiPageResponder implements SecureResponder {
-  protected WikiPage page;
-  protected PageData pageData;
-  protected String pageTitle;
-  protected Request request;
-  protected PageCrawler crawler;
-
-  public Response makeResponse(FitNesseContext context, Request request)
-    throws Exception {
-    String pageName = getPageNameOrDefault(request, "FrontPage");
-    loadPage(pageName, context);
-    if (page == null)
-      return notFoundResponse(context, request);
-    else
-      return makePageResponse(context);
-  }
-
-  private String getPageNameOrDefault(Request request, String defaultPageName)
-  {
-    String pageName = request.getResource();
-    if (StringUtil.isBlank(pageName))
-      pageName = defaultPageName;
-
-    return pageName;
-  }
-
-  protected void loadPage(String resource, FitNesseContext context)
-    throws Exception {
-    WikiPagePath path = PathParser.parse(resource);
-    crawler = context.root.getPageCrawler();
-    crawler.setDeadEndStrategy(new VirtualEnabledPageCrawler());
-    page = crawler.getPage(context.root, path);
-    if (page != null)
-      pageData = page.getData();
-  }
-
-  private Response notFoundResponse(FitNesseContext context, Request request)
-    throws Exception {
-    return new NotFoundResponder().makeResponse(context, request);
-  }
-
-  private SimpleResponse makePageResponse(FitNesseContext context)
-    throws Exception {
-    pageTitle = PathParser.render(crawler.getFullPath(page));
-    String html = makeHtml(context);
-
-    SimpleResponse response = new SimpleResponse();
-    response.setMaxAge(0);
-    response.setContent(html);
-    return response;
-  }
-  
-  ...
-}
-```
-</details>
