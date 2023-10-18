@@ -1,10 +1,10 @@
-package vertfn
+package refdir
 
 import (
 	"go/token"
 	"sort"
 
-	"github.com/nikolaydubina/vertfn/analysis/vertfn/color"
+	"github.com/devnev/refdir/analysis/refdir/color"
 	"golang.org/x/tools/go/analysis"
 )
 

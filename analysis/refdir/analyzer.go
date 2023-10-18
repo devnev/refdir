@@ -1,4 +1,4 @@
-package vertfn
+package refdir
 
 import (
 	"flag"
@@ -7,7 +7,7 @@ import (
 	"go/token"
 	"go/types"
 
-	"github.com/nikolaydubina/vertfn/analysis/vertfn/color"
+	"github.com/devnev/refdir/analysis/refdir/color"
 
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/inspect"

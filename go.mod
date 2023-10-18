@@ -1,4 +1,4 @@
-module github.com/nikolaydubina/vertfn
+module github.com/devnev/refdir
 
 go 1.18
 
