@@ -33,7 +33,8 @@ const (
 	Func     RefKind = "func"
 	Type     RefKind = "type"
 	RecvType RefKind = "recvtype"
-	Value    RefKind = "value"
+	Var      RefKind = "var"
+	Const    RefKind = "const"
 )
 
 type Direction string
@@ -48,7 +49,8 @@ var RefOrder = map[RefKind]Direction{
 	Func:     Down,
 	Type:     Down,
 	RecvType: Up,
-	Value:    Down,
+	Var:      Down,
+	Const:    Down,
 }
 
 func init() {
@@ -68,7 +70,8 @@ func init() {
 	addDirectionFlag(Func, "direction of references to functions and methods")
 	addDirectionFlag(Type, "direction of type references, excluding references to the receiver type")
 	addDirectionFlag(RecvType, "direction of references to the receiver type")
-	addDirectionFlag(Value, "direction of references to const and var declarations")
+	addDirectionFlag(Var, "direction of references to var declarations")
+	addDirectionFlag(Const, "direction of references to const declarations")
 }
 
 func run(pass *analysis.Pass) (interface{}, error) {
@@ -192,7 +195,13 @@ func run(pass *analysis.Pass) (interface{}, error) {
 				} else if def.Parent() != def.Pkg().Scope() {
 					printer.Info(node.Pos(), fmt.Sprintf("skipping var ident %s with inner parent scope %s", node.Name, pass.Fset.Position(def.Parent().Pos())))
 				} else {
-					check(node, def.Pos(), Value)
+					check(node, def.Pos(), Var)
+				}
+			case *types.Const:
+				if def.Parent() != def.Pkg().Scope() {
+					printer.Info(node.Pos(), fmt.Sprintf("skipping var ident %s with inner parent scope %s", node.Name, pass.Fset.Position(def.Parent().Pos())))
+				} else {
+					check(node, def.Pos(), Const)
 				}
 			case *types.Func:
 				def = def.Origin()
