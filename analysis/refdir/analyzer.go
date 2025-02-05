@@ -143,6 +143,7 @@ func run(pass *analysis.Pass) (interface{}, error) {
 		if !push {
 			if funcDecl == n {
 				funcDecl = nil
+				recvType = nil
 			}
 			return true
 		}
@@ -163,29 +164,6 @@ func run(pass *analysis.Pass) (interface{}, error) {
 		case *ast.FuncType:
 			beforeFuncType = false
 
-		case *ast.SelectorExpr:
-			sel := pass.TypesInfo.Selections[node]
-			if sel == nil {
-				// Based on TypesInfo.Selection docs this should only be the
-				// case for "qualified identifiers", which I think means
-				// references to out-of-package identifiers, which we don't care
-				// about anyway. Logging just in case.
-				printer.Info(node.Pos(), fmt.Sprintf("skipping selector %s with missing Selections", node.Sel.String()))
-				break
-			}
-
-			obj := sel.Obj()
-			switch sel.Kind() {
-			case types.MethodVal:
-				check(node.Sel, obj.Pos(), Func)
-			case types.FieldVal:
-			case types.MethodExpr:
-				check(node.Sel, obj.Pos(), Func)
-			default:
-				// No other enum values are defined, logging just in case.
-				printer.Info(node.Pos(), fmt.Sprintf("unknown selection kind %v", sel.Kind()))
-			}
-
 		case *ast.Ident:
 			switch def := pass.TypesInfo.Uses[node].(type) {
 			case *types.Var:
@@ -197,12 +175,14 @@ func run(pass *analysis.Pass) (interface{}, error) {
 				} else {
 					check(node, def.Pos(), Var)
 				}
+
 			case *types.Const:
 				if def.Parent() != def.Pkg().Scope() {
 					printer.Info(node.Pos(), fmt.Sprintf("skipping var ident %s with inner parent scope %s", node.Name, pass.Fset.Position(def.Parent().Pos())))
 				} else {
 					check(node, def.Pos(), Const)
 				}
+
 			case *types.Func:
 				def = def.Origin()
 				if def.Parent() != nil && def.Parent() != def.Pkg().Scope() {
@@ -210,6 +190,7 @@ func run(pass *analysis.Pass) (interface{}, error) {
 				} else {
 					check(node, def.Pos(), Func)
 				}
+
 			case *types.TypeName:
 				if funcDecl != nil && beforeFuncType {
 					// We're in a file-level func decl before getting to the
@@ -225,6 +206,7 @@ func run(pass *analysis.Pass) (interface{}, error) {
 					break
 				}
 				check(node, def.Pos(), Type)
+
 			default:
 				printer.Info(node.Pos(), fmt.Sprintf("unexpected ident def type %T for %q", pass.TypesInfo.Uses[node], node.Name))
 			}

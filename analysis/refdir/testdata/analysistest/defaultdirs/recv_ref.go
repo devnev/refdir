@@ -1,7 +1,7 @@
 package defaultdirs
 
-type EmptyStruct struct{}
+type TestReceiverReference struct{}
 
-func (e EmptyStruct) TestReceiverReference() {
+func (e TestReceiverReference) TestReceiverReference() {
 	_ = e
 }
