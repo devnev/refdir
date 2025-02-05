@@ -15,8 +15,8 @@ import (
 )
 
 var Analyzer = &analysis.Analyzer{
-	Name:     "vertfn",
-	Doc:      "report vertical function ordering information",
+	Name:     "refdir",
+	Doc:      "Report potential reference-to-decleration ordering issues",
 	Run:      run,
 	Flags:    flag.FlagSet{},
 	Requires: []*analysis.Analyzer{inspect.Analyzer},
