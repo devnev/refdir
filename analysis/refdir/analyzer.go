@@ -193,16 +193,12 @@ func run(pass *analysis.Pass) (interface{}, error) {
 
 			case *types.TypeName:
 				if funcDecl != nil && beforeFuncType {
-					// We're in a file-level func decl before getting to the
-					// function type, so this must be an identifier in the type
-					// of the receiver.
+					check(node, def.Pos(), RecvType)
 					recvType = def
-					printer.Info(node.Pos(), fmt.Sprintf("skipping ident %s in recv list", node.Name))
 					break
 				}
 				if funcDecl != nil && recvType == def {
 					// Reference to the receiver type within a method type or body
-					check(node, def.Pos(), RecvType)
 					break
 				}
 				check(node, def.Pos(), Type)
