@@ -5,6 +5,15 @@ linters-settings:
       type: module
       description: "Report potential reference-to-decleration ordering issues"
       original-url: "github.com/devnev/refdir"
+      # All settings are optional.
+      # These example settings correspond to the analyzer defaults.
+      # Possible values are 'up', 'down', and 'ignore'
+      settings:
+        func: down
+        type: down
+        recvtype: up
+        var: down
+        const: down
 
 linters:
   disable-all: true
