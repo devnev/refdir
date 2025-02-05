@@ -114,7 +114,12 @@ func run(pass *analysis.Pass) (interface{}, error) {
 		if !refBeforeDef {
 			order = "after"
 		}
-		message := fmt.Sprintf(`%s reference %s is %s definition (%s)`, kind, ref.Name, order, pass.Fset.Position(def))
+		var message string
+		if verbose {
+			message = fmt.Sprintf(`%s reference %s is %s definition (%s)`, kind, ref.Name, order, pass.Fset.Position(def))
+		} else {
+			message = fmt.Sprintf(`%s reference %s is %s definition`, kind, ref.Name, order)
+		}
 
 		if orderOk := refBeforeDef == (RefOrder[kind] == Down); orderOk {
 			printer.Ok(ref.Pos(), message)

@@ -1,0 +1,3 @@
+package defaultdirs
+
+func TestEmptyFunc() {}
