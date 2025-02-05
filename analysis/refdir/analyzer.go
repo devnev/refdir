@@ -192,6 +192,11 @@ func run(pass *analysis.Pass) (interface{}, error) {
 				}
 
 			case *types.TypeName:
+				if def.Parent() != def.Pkg().Scope() {
+					printer.Info(node.Pos(), fmt.Sprintf("skipping type ident %s with inner parent scope %s", node.Name, pass.Fset.Position(def.Parent().Pos())))
+					break
+				}
+
 				if funcDecl != nil && beforeFuncType {
 					check(node, def.Pos(), RecvType)
 					recvType = def
