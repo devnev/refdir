@@ -90,14 +90,7 @@ func run(pass *analysis.Pass) (interface{}, error) {
 	check := func(ref *ast.Ident, def token.Pos, kind RefKind) {
 		if !def.IsValid() {
 			// So far only seen on calls to Error method of error interface
-			printer.Info(ref.Pos(), "got invalid definition position")
-			return
-		}
-		// Ignore references to definitions that aren't at file scope, e.g. to local variables
-		defFileScope := pass.Pkg.Scope().Innermost(pass.Fset.File(def).LineStart(1))
-		defScope := pass.Pkg.Scope().Innermost(def)
-		if defScope != defFileScope {
-			printer.Info(ref.Pos(), fmt.Sprintf("skpping definition with inner scope from %s", pass.Fset.Position(defScope.Pos())))
+			printer.Info(ref.Pos(), fmt.Sprintf("got invalid definition position for %q", ref.Name))
 			return
 		}
 
@@ -134,7 +127,7 @@ func run(pass *analysis.Pass) (interface{}, error) {
 	// No need for a stack as method declarations can only be at file scope.
 	var (
 		funcDecl       *ast.FuncDecl
-		recvType       *ast.TypeSpec
+		recvType       *types.TypeName
 		beforeFuncType bool
 	)
 
@@ -181,47 +174,40 @@ func run(pass *analysis.Pass) (interface{}, error) {
 			}
 
 		case *ast.Ident:
-			if node.Obj == nil {
-				// Unclear when Obj is nil, but so far only cases where its ok:
-				// import references, qualified identifiers, method names in
-				// their definitions and package names in their definitions.
-				printer.Info(node.Pos(), fmt.Sprintf("missing Obj for %s", node.Name))
-				break
-			}
-
-			switch spec := node.Obj.Decl.(type) {
-			case *ast.ValueSpec:
-				for _, ident := range spec.Names {
-					if ident.Name == node.Name && ident != node {
-						check(node, ident.Pos(), Value)
-					}
+			switch def := pass.TypesInfo.Uses[node].(type) {
+			case *types.Var:
+				def = def.Origin()
+				if def.IsField() {
+					printer.Info(node.Pos(), fmt.Sprintf("skipping var ident %s for field %s", node.Name, pass.Fset.Position(def.Pos())))
+				} else if def.Parent() != def.Pkg().Scope() {
+					printer.Info(node.Pos(), fmt.Sprintf("skipping var ident %s with inner parent scope %s", node.Name, pass.Fset.Position(def.Parent().Pos())))
+				} else {
+					check(node, def.Pos(), Value)
 				}
-			case *ast.Field:
-				// Explicitly log for easier debugging
-				for _, ident := range spec.Names {
-					if ident.Name == node.Name && ident != node {
-						printer.Info(node.Pos(), fmt.Sprintf("skipping ident %s for field %s", node.Name, pass.Fset.Position(spec.Pos())))
-					}
+			case *types.Func:
+				def = def.Origin()
+				if def.Parent() != nil && def.Parent() != def.Pkg().Scope() {
+					printer.Info(node.Pos(), fmt.Sprintf("skipping func ident %s with inner parent scope %s", node.Name, pass.Fset.Position(def.Parent().Pos())))
+				} else {
+					check(node, def.Pos(), Func)
 				}
-			case *ast.FuncDecl:
-				check(node, spec.Pos(), Func)
-			case *ast.TypeSpec:
+			case *types.TypeName:
 				if funcDecl != nil && beforeFuncType {
 					// We're in a file-level func decl before getting to the
 					// function type, so this must be an identifier in the type
 					// of the receiver.
-					recvType = spec
+					recvType = def
 					printer.Info(node.Pos(), fmt.Sprintf("skipping ident %s in recv list", node.Name))
 					break
 				}
-				if funcDecl != nil && recvType == spec {
+				if funcDecl != nil && recvType == def {
 					// Reference to the receiver type within a method type or body
-					check(node, spec.Pos(), RecvType)
+					check(node, def.Pos(), RecvType)
 					break
 				}
-				check(node, spec.Pos(), Type)
+				check(node, def.Pos(), Type)
 			default:
-				printer.Info(node.Pos(), fmt.Sprintf("unexpected ident decl type %T", node.Obj.Decl))
+				printer.Info(node.Pos(), fmt.Sprintf("unexpected ident def type %T for %q", pass.TypesInfo.Uses[node], node.Name))
 			}
 		}
 
