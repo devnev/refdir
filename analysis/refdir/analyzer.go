@@ -137,6 +137,13 @@ func run(pass *analysis.Pass) (interface{}, error) {
 	)
 
 	inspect.Nodes(nil, func(n ast.Node, push bool) (proceed bool) {
+		if !push {
+			if funcDecl == n {
+				funcDecl = nil
+			}
+			return true
+		}
+
 		switch node := n.(type) {
 		case *ast.File:
 			if ast.IsGenerated(node) {
@@ -145,11 +152,9 @@ func run(pass *analysis.Pass) (interface{}, error) {
 			}
 
 		case *ast.FuncDecl:
-			if push && funcDecl == nil {
+			if funcDecl == nil {
 				funcDecl = node
 				beforeFuncType = true
-			} else if funcDecl == node {
-				funcDecl = nil
 			}
 
 		case *ast.FuncType:
