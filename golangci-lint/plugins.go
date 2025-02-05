@@ -41,6 +41,9 @@ func (p *Plugin) BuildAnalyzers() ([]*analysis.Analyzer, error) {
 	for kind, dir := range p.settings {
 		refdir.RefOrder[kind] = dir
 	}
+	if err := refdir.Analyzer.Flags.Set("color", "false"); err != nil {
+		return nil, fmt.Errorf("failed to disable color setting", err)
+	}
 	return []*analysis.Analyzer{refdir.Analyzer}, nil
 }
 
