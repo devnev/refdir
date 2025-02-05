@@ -1,10 +1,10 @@
+# yaml-language-server: $schema=https://json.schemastore.org/golangci-lint.json
 linters-settings:
   custom:
     refdir:
       type: module
-      description: "Report potential reference-to-decleration ordering issues",
+      description: "Report potential reference-to-decleration ordering issues"
       original-url: "github.com/devnev/refdir"
-      settings: {}
 
 linters:
   disable-all: true
