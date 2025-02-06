@@ -9,11 +9,12 @@ linters-settings:
       # These example settings correspond to the analyzer defaults.
       # Possible values are 'up', 'down', and 'ignore'
       settings:
-        func: down
-        type: down
-        recvtype: up
-        var: down
-        const: down
+        directions:
+          func: down
+          type: down
+          recvtype: up
+          var: down
+          const: down
 
 linters:
   disable-all: true

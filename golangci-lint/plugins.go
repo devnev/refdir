@@ -14,13 +14,15 @@ func init() {
 }
 
 func New(rawSettings any) (register.LinterPlugin, error) {
-	settings, err := register.DecodeSettings[map[string]string](rawSettings)
+	settings, err := register.DecodeSettings[struct {
+		Directions map[string]string `json:"directions"`
+	}](rawSettings)
 	if err != nil {
 		return nil, err
 	}
 
 	parsedOrder := map[refdir.RefKind]refdir.Direction{}
-	for key, value := range settings {
+	for key, value := range settings.Directions {
 		if !slices.Contains(refdir.RefKinds, refdir.RefKind(key)) {
 			return nil, fmt.Errorf("invalid refdir settings key %q", key)
 		}
