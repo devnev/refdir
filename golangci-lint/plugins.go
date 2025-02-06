@@ -41,7 +41,9 @@ type Plugin struct {
 
 func (p *Plugin) BuildAnalyzers() ([]*analysis.Analyzer, error) {
 	for kind, dir := range p.settings {
-		refdir.RefOrder[kind] = dir
+		if err := refdir.Analyzer.Flags.Set(fmt.Sprintf("%s-dir", kind), fmt.Sprint(dir)); err != nil {
+			return nil, err
+		}
 	}
 	if err := refdir.Analyzer.Flags.Set("color", "false"); err != nil {
 		return nil, fmt.Errorf("failed to disable color setting: %w", err)
