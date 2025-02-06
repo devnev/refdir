@@ -1,0 +1,13 @@
+# yaml-language-server: $schema=https://json.schemastore.org/golangci-lint.json
+linters-settings:
+  custom:
+    refdir:
+      type: module
+      settings:
+        directions:
+          func: up
+
+linters:
+  disable-all: true
+  enable:
+    - refdir

@@ -37,6 +37,14 @@ const (
 	Const    RefKind = "const"
 )
 
+var RefKinds = []RefKind{
+	Func,
+	Type,
+	RecvType,
+	Var,
+	Const,
+}
+
 type Direction string
 
 const (
@@ -44,6 +52,12 @@ const (
 	Up     Direction = "up"
 	Ignore Direction = "ignore"
 )
+
+var Directions = []Direction{
+	Down,
+	Up,
+	Ignore,
+}
 
 var RefOrder = map[RefKind]Direction{
 	Func:     Down,
