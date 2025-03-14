@@ -19,11 +19,11 @@ type SimplePrinter struct {
 	Pass *analysis.Pass
 }
 
-func (c SimplePrinter) Error(p token.Pos, s string) { c.Pass.Reportf(p, s) }
+func (c SimplePrinter) Error(p token.Pos, s string) { c.Pass.Reportf(p, "%s", s) }
 
-func (c SimplePrinter) Info(p token.Pos, s string) { c.Pass.Reportf(p, s) }
+func (c SimplePrinter) Info(p token.Pos, s string) { c.Pass.Reportf(p, "%s", s) }
 
-func (c SimplePrinter) Ok(p token.Pos, s string) { c.Pass.Reportf(p, s) }
+func (c SimplePrinter) Ok(p token.Pos, s string) { c.Pass.Reportf(p, "%s", s) }
 
 func (c SimplePrinter) Flush() {}
 
@@ -56,15 +56,15 @@ type ColorPrinter struct {
 }
 
 func (c ColorPrinter) Error(p token.Pos, s string) {
-	c.Pass.Reportf(p, color.Colorize(c.ColorError, s))
+	c.Pass.Reportf(p, "%s", color.Colorize(c.ColorError, s))
 }
 
 func (c ColorPrinter) Info(p token.Pos, s string) {
-	c.Pass.Reportf(p, color.Colorize(c.ColorInfo, s))
+	c.Pass.Reportf(p, "%s", color.Colorize(c.ColorInfo, s))
 }
 
 func (c ColorPrinter) Ok(p token.Pos, s string) {
-	c.Pass.Reportf(p, color.Colorize(c.ColorOk, s))
+	c.Pass.Reportf(p, "%s", color.Colorize(c.ColorOk, s))
 }
 
 func (c ColorPrinter) Flush() {}

@@ -1,8 +1,6 @@
 module github.com/devnev/refdir
 
-go 1.22.0
-
-toolchain go1.23.2
+go 1.24.0
 
 require (
 	github.com/golangci/plugin-module-register v0.1.1
